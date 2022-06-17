@@ -37,7 +37,8 @@ int main()
 
 
 ```
-![get-started output]("https://github.com/randydu/rang-util/blob/4b1845336dc03933c5ba6968528392494e6306ac/src/tests/rang_util.png")
+
+![get-started output](https://github.com/randydu/rang-util/blob/4b1845336dc03933c5ba6968528392494e6306ac/src/tests/rang_util.png)
 
 As you can see, you can predefine view styles to make the output code more maintainable. If you want to change the color of all error messages, just change the error style.
 
