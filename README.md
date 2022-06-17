@@ -37,6 +37,7 @@ int main()
 
 
 ```
+![get-started output]("./src/tests/rang_util.png")
 
 As you can see, you can predefine view styles to make the output code more maintainable. If you want to change the color of all error messages, just change the error style.
 
@@ -102,7 +103,7 @@ Another unique feature of rang-util style object is that: they can work in OOP s
 std::cout << H1("Hello World") << std::endl;
 ```
 
-They encapsulate the rendered content inside the style object and __auto-reset__ the ostream settings at the end of content rendering.
+The content is captured inside the style object and the output stream settings will be  __auto-resetted__ (by a rang::style::reset) at the end of content rendering.
 
 Because a style object with a captured content is also streamable, it can be combined with other style objects as usual:
 
