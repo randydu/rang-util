@@ -1,0 +1,9 @@
+[wrap-git]
+
+directory = rang_util
+url=https://github.com/randydu/rang-util.git
+revision = head
+clone-recursive = false
+
+[provide]
+rang_util = rang_util_dep
