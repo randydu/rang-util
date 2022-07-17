@@ -27,6 +27,14 @@ namespace rang::util
     namespace __detail
     {
 
+        struct style_reset_t
+        {
+            inline friend std::ostream &operator<<(std::ostream &os, style_reset_t self)
+            {
+                return os << rang::style::reset;
+            }
+        };
+
         template <Style S, Style T>
         class style_composer_t
         {
@@ -45,7 +53,7 @@ namespace rang::util
             constexpr Style auto operator()(V &&v) const
             {
                 auto s = style_composer_t<this_type, V>(*this, std::forward<V>(v));
-                return style_composer_t<decltype(s), rang::style>(s, rang::style::reset); //reset style 
+                return style_composer_t<decltype(s), rang::style>(std::move(s), rang::style::reset); // auto-reset
             }
 
         private:
@@ -57,13 +65,14 @@ namespace rang::util
         class style_it_t
         {
         public:
+            constexpr style_it_t(const S &s) : s_(s) {}
             constexpr style_it_t(S &&s) : s_(std::forward<S>(s)) {}
 
             template <Style T>
             constexpr Style auto operator()(T &&t) const
             {
                 auto s = style_composer_t<S, T>(s_, std::forward<T>(t));
-                return style_composer_t<decltype(s), rang::style>(s, rang::style::reset); //reset style 
+                return style_composer_t<decltype(s), rang::style>(std::move(s), rang::style::reset); // reset style
             }
 
             constexpr friend std::ostream &operator<<(std::ostream &os, style_it_t self)
@@ -80,6 +89,7 @@ namespace rang::util
         class style_repeat_t
         {
         public:
+            constexpr style_repeat_t(const S &s) : s_(s) {}
             constexpr style_repeat_t(S &&s) : s_(std::forward<S>(s)) {}
 
             constexpr friend std::ostream &operator<<(std::ostream &os, const style_repeat_t &self)
@@ -101,9 +111,11 @@ namespace rang::util
         public:
             style_dummy() = default;
 
-            template <typename T>
-            style_dummy(T &&) {}
-
+            template <Style T>
+            constexpr Style auto operator()(T &&t) const
+            {
+                return t;
+            }
             constexpr friend std::ostream &operator<<(std::ostream &os, const style_dummy &self)
             {
                 return os;
@@ -111,16 +123,22 @@ namespace rang::util
         };
     } // namespace __detail
 
+    inline constexpr auto style_dummy = __detail::style_dummy{};
+
+    constexpr Style auto make_style(){
+        return style_dummy;
+    }
+
     template <Style S>
     constexpr Style auto make_style(S &&s)
     {
-        return __detail::style_it_t<S>(std::forward<S>(s));
+        return __detail::style_it_t<std::remove_cvref_t<S>>(std::forward<S>(s));
     }
 
     template <Style S1, Style S2, Style... Ts>
     constexpr Style auto make_style(S1 &&s1, S2 &&s2, Ts... ts)
     {
-        Style auto s = __detail::style_composer_t<S1, S2>(std::forward<S1>(s1), std::forward<S2>(s2));
+        Style auto s = __detail::style_composer_t<std::remove_cvref_t<S1>, std::remove_cvref_t<S2>>(std::forward<S1>(s1), std::forward<S2>(s2));
         if constexpr (sizeof...(Ts) == 0)
             return s;
         else
@@ -130,10 +148,9 @@ namespace rang::util
     template <Style S, int N>
     constexpr Style auto repeat_style(S &&s)
     {
-        return __detail::style_repeat_t<S, N>(std::forward<S>(s));
+        return __detail::style_repeat_t<std::remove_cvref_t<S>, N>(std::forward<S>(s));
     }
 
-    inline constexpr auto style_dummy = __detail::style_dummy{};
 
     namespace html
     {
